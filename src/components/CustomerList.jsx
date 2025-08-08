@@ -1,7 +1,7 @@
 import React from 'react';
 import CustomerCard from './CustomCard.jsx';
 
-function CustomerList({ customers }) {
+function CustomerList({ customers, onEditCustomer, onDeleteCustomer }) {
   if (customers.length === 0) {
     return <div className="no-results">No se encontraron clientes</div>;
   }
@@ -11,7 +11,12 @@ function CustomerList({ customers }) {
       <h2>Resultados de la búsqueda ({customers.length})</h2>
       <div className="customer-grid">
         {customers.map(customer => (
-          <CustomerCard key={customer.id} customer={customer} />
+          <CustomerCard 
+            key={customer.id} 
+            customer={customer} 
+            onEdit={onEditCustomer}
+            onDelete={onDeleteCustomer}
+          />
         ))}
       </div>
     </div>

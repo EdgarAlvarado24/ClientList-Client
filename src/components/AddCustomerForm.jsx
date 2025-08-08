@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-function AddCustomerForm({ onAdd, loading, onToggleForm }) {
+function AddCustomerForm({ onAdd, onEdit, loading, onToggleForm, editingCustomer, onCancelEdit }) {
   const [formData, setFormData] = useState({
     nombre: '',
     telefono: '',
@@ -8,6 +8,22 @@ function AddCustomerForm({ onAdd, loading, onToggleForm }) {
     address: ''
   });
   const [showForm, setShowForm] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Efecto para manejar cuando se está editando un cliente
+  useEffect(() => {
+    if (editingCustomer) {
+      setFormData({
+        nombre: editingCustomer.nombre || '',
+        telefono: editingCustomer.telefono || '',
+        email: editingCustomer.email || '',
+        address: editingCustomer.address || ''
+      });
+      setShowForm(true);
+      setIsEditing(true);
+      if (onToggleForm) onToggleForm(false);
+    }
+  }, [editingCustomer, onToggleForm]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -19,17 +35,23 @@ function AddCustomerForm({ onAdd, loading, onToggleForm }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (onAdd) {
+    
+    if (isEditing && onEdit) {
+      await onEdit(editingCustomer.id, formData);
+      setIsEditing(false);
+      if (onCancelEdit) onCancelEdit();
+    } else if (onAdd) {
       await onAdd(formData);
-      setFormData({
-        nombre: '',
-        telefono: '',
-        email: '',
-        address: ''
-      });
-      setShowForm(false);
-      if (onToggleForm) onToggleForm(true);
     }
+    
+    setFormData({
+      nombre: '',
+      telefono: '',
+      email: '',
+      address: ''
+    });
+    setShowForm(false);
+    if (onToggleForm) onToggleForm(true);
   };
 
   const handleCancel = () => {
@@ -40,7 +62,9 @@ function AddCustomerForm({ onAdd, loading, onToggleForm }) {
       address: ''
     });
     setShowForm(false);
+    setIsEditing(false);
     if (onToggleForm) onToggleForm(true);
+    if (onCancelEdit) onCancelEdit();
   };
 
   if (!showForm) {
@@ -62,7 +86,7 @@ function AddCustomerForm({ onAdd, loading, onToggleForm }) {
 
   return (
     <div className="add-customer-section">
-      <h3>Agregar Nuevo Cliente</h3>
+      <h3>{isEditing ? 'Editar Cliente' : 'Agregar Nuevo Cliente'}</h3>
       <form onSubmit={handleSubmit} className="add-customer-form">
         <div className="form-group">
           <label htmlFor="nombre">Nombre:</label>
@@ -120,7 +144,7 @@ function AddCustomerForm({ onAdd, loading, onToggleForm }) {
             className="submit-btn"
             disabled={loading}
           >
-            {loading ? 'Agregando...' : 'Agregar Cliente'}
+            {loading ? (isEditing ? 'Editando...' : 'Agregando...') : (isEditing ? 'Guardar Cambios' : 'Agregar Cliente')}
           </button>
           <button 
             type="button" 

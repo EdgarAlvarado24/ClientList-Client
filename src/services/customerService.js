@@ -38,3 +38,46 @@ export const createCustomer = async (customerData) => {
     throw error;
   }
 };
+
+export const updateCustomer = async (customerId, customerData) => {
+  try {
+    const response = await fetch(`${API_URL}/edit/${customerId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(customerData)
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Error al actualizar cliente');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error en customerService:', error);
+    throw error;
+  }
+};
+
+export const deleteCustomer = async (customerId) => {
+  try {
+    const response = await fetch(`${API_URL}/delete/${customerId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Error al eliminar cliente');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error en customerService:', error);
+    throw error;
+  }
+};

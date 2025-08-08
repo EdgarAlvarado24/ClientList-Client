@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import SearchForm from './components/SearchForm';
 import CustomerList from './components/CustomerList';
 import AddCustomerForm from './components/AddCustomerForm';
-import { searchCustomers, createCustomer } from './services/customerService.js';
+import ConfirmModal from './components/ConfirmModal';
+import LoadingScreen from './components/LoadingScreen';
+import { searchCustomers, createCustomer, updateCustomer, deleteCustomer } from './services/customerService.js';
 import './App.css';
 
 function App() {
@@ -10,6 +12,9 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showSearchForm, setShowSearchForm] = useState(true);
+  const [editingCustomer, setEditingCustomer] = useState(null);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, customer: null });
+  const [loadingMessage, setLoadingMessage] = useState('');
 
   const handleSearch = async (searchTerm, searchType) => {
     setLoading(true);
@@ -28,6 +33,7 @@ function App() {
 
   const handleAddCustomer = async (customerData) => {
     setLoading(true);
+    setLoadingMessage('Agregando cliente...');
     setError(null);
     
     try {
@@ -39,7 +45,66 @@ function App() {
       console.error(err);
     } finally {
       setLoading(false);
+      setLoadingMessage('');
     }
+  };
+
+  const handleEditCustomer = async (customerId, customerData) => {
+    setLoading(true);
+    setLoadingMessage('Actualizando cliente...');
+    setError(null);
+    
+    try {
+      const updatedCustomer = await updateCustomer(customerId, customerData);
+      // Actualizar el cliente en la lista
+      setCustomers(prev => 
+        prev.map(customer => 
+          customer.id === customerId ? updatedCustomer : customer
+        )
+      );
+    } catch (err) {
+      setError('Error al actualizar cliente. Por favor, intente nuevamente.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+      setLoadingMessage('');
+    }
+  };
+
+  const handleStartEdit = (customer) => {
+    setEditingCustomer(customer);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCustomer(null);
+  };
+
+  const handleDeleteCustomer = (customer) => {
+    setDeleteModal({ isOpen: true, customer });
+  };
+
+  const handleConfirmDelete = async () => {
+    const { customer } = deleteModal;
+    setLoading(true);
+    setLoadingMessage('Eliminando cliente...');
+    setError(null);
+    
+    try {
+      await deleteCustomer(customer.id);
+      // Eliminar el cliente de la lista
+      setCustomers(prev => prev.filter(c => c.id !== customer.id));
+      setDeleteModal({ isOpen: false, customer: null });
+    } catch (err) {
+      setError('Error al eliminar cliente. Por favor, intente nuevamente.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+      setLoadingMessage('');
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteModal({ isOpen: false, customer: null });
   };
 
   return (
@@ -47,15 +112,31 @@ function App() {
       <h1>Clientes</h1>
       <AddCustomerForm 
         onAdd={handleAddCustomer} 
+        onEdit={handleEditCustomer}
         loading={loading} 
         onToggleForm={setShowSearchForm}
+        editingCustomer={editingCustomer}
+        onCancelEdit={handleCancelEdit}
       />
       {showSearchForm && <SearchForm onSearch={handleSearch} loading={loading} />}
       
       {loading && <div className="loading">Buscando...</div>}
       {error && <div className="error">{error}</div>}
       
-      <CustomerList customers={customers} />
+      {!loading && <CustomerList customers={customers} onEditCustomer={handleStartEdit} onDeleteCustomer={handleDeleteCustomer} />}
+      
+      <ConfirmModal
+        isOpen={deleteModal.isOpen}
+        title="Confirmar eliminación"
+        message={`¿Estás seguro de que quieres eliminar a ${deleteModal.customer?.nombre}?`}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
+      
+      <LoadingScreen 
+        isVisible={loading} 
+        message={loadingMessage}
+      />
     </div>
   );
 }
