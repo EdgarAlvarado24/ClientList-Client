@@ -27,8 +27,10 @@ function SearchForm({ onSearch, loading }) {
           onChange={(e) => setSearchType(e.target.value)}
           disabled={loading}
         >
-          <option value="nombre">Buscar por nombre</option>
-          <option value="telefono">Buscar por teléfono</option>
+          <option value="nombre">Nombre</option>
+          <option value="telefono">Teléfono</option>
+          <option value="email">Correo Electronico</option>
+          <option value="address">Direccion</option>
         </select>
         
         <button type="submit" disabled={loading || !searchTerm.trim()}>
