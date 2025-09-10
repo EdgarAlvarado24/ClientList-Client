@@ -1,0 +1,26 @@
+import React from 'react';
+import CustomerCard from './CustomerCard'; // Assuming CustomerCard is in the same folder
+
+function CustomerList({ customers, onEditCustomer, onDeleteCustomer }) {
+  if (customers.length === 0) {
+    return <div className="no-results">No se encontraron clientes</div>;
+  }
+
+  return (
+    <div className="customer-list">
+      <h2>Resultados de la búsqueda ({customers.length})</h2>
+      <div className="customer-grid">
+        {customers.map(customer => (
+          <CustomerCard 
+            key={customer.id} 
+            customer={customer} 
+            onEdit={onEditCustomer}
+            onDelete={onDeleteCustomer}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default CustomerList;
