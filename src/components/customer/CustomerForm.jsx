@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-function AddCustomerForm({ onAdd, onEdit, loading, onToggleForm, editingCustomer, onCancelEdit }) {
+function CustomerForm({ onAdd, onEdit, loading, onToggleForm, editingCustomer, onCancelEdit }) {
   const [formData, setFormData] = useState({
     nombre: '',
     telefono: '',
@@ -160,4 +160,4 @@ function AddCustomerForm({ onAdd, onEdit, loading, onToggleForm, editingCustomer
   );
 }
 
-export default AddCustomerForm; 
+export default CustomerForm; 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 function SearchForm({ onSearch, loading }) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchType, setSearchType] = useState('name');
+  const [searchType, setSearchType] = useState('nombre');
 
   const handleSubmit = (e) => {
     e.preventDefault();
